@@ -1,15 +1,28 @@
 import collections, re
 
-def charUsableForCompression(char, text):
-    if(char <= 255 and chr(char) in text):
+def codeNotInText(code, text):
+    if(code in text):
         return False
     return True
 
+def convertStringToAsciiValues(string):
+    return [ord(c) for c in string]
 
-def findNextAvailableDelimiter(start, text):
-    for ch in range(start, 256):
-        if chr(ch) not in text:
-            return ch
+def convertAsciiValuesToString(asciiValues):
+    return ''.join(chr(i) for i in asciiValues)
+
+def findNextAvailableCode(startCode, text):
+    asciiValues = convertStringToAsciiValues(startCode)
+    asciiValues[-1] += 1
+    while True:
+        lastChar = asciiValues[-1]
+        for ch in range(lastChar, 256):
+            asciiValues[-1] = ch
+            newCode = convertAsciiValuesToString(asciiValues)
+            if codeNotInText(newCode, text):
+                return newCode
+        asciiValues = [0] * len(asciiValues)
+        asciiValues.append(0)
 
 
 def compress(text):
@@ -20,27 +33,34 @@ def compress(text):
     list = sorted(collections.Counter(allWords).items(), key=lambda x: x[1], reverse = True)
     allWordsOrdered = [x[0] for x in list]
 
-    dictionaryDelimiter = findNextAvailableDelimiter(32, text)
-    replacementDelimiter = findNextAvailableDelimiter(dictionaryDelimiter + 1, text)
+    dictionaryDelimiter = findNextAvailableCode(chr(32), text)
+    replacementDelimiter = findNextAvailableCode(dictionaryDelimiter, text)
 
-    replacementChar = replacementDelimiter + 1
+    lastReplacement = replacementDelimiter
+    skipFindingNextCode = False
+    for word in allWordsOrdered:
+        if not skipFindingNextCode:
+            lastReplacement = findNextAvailableCode(lastReplacement, text)
+        if(len(lastReplacement) < len(word)):
+            dictionary[word] = lastReplacement
+            skipFindingNextCode = False
+        else:
+            skipFindingNextCode = True
 
-    i = 0
-    for ch in range(replacementChar, 256):
-        if i >= len(allWordsOrdered):
-            break
-        if charUsableForCompression(ch, text):
-            word = allWordsOrdered[i]
-            dictionary[word] = chr(ch)
-            i += 1
-
+    print(dictionary)
+    print(len(dictionary))
     dictionaryString = ''
     for word, replacement in dictionary.items():
+        if(len(word) <= len(replacement)):
+            print(word + '->' + replacement)
         text = text.replace(word, replacement)
-        dictionaryString += word + replacement + chr(replacementDelimiter)
+        dictionaryString += word + replacement + replacementDelimiter
 
-    dictionaryString = chr(dictionaryDelimiter) + dictionaryString
-    return chr(dictionaryDelimiter) + chr(replacementDelimiter) + text + dictionaryString
+    print('dictionary string len:' + str(len(dictionaryString)))
+    print('text len:' + str(len(text)))
+    dictionaryString = dictionaryDelimiter + dictionaryString
+    print(dictionaryString)
+    return dictionaryDelimiter + replacementDelimiter + text + dictionaryString
 
 
 def extractDictionary(dictionaryString, replacementDelimiter):
@@ -66,7 +86,7 @@ def uncompress(text):
         text = text.replace(replacement, word)
     return text
 
-s = str(open('enwik8', 'rb').read())
+s = str(open('lifeisfine.txt', 'rb').read())
 # s = 'Hello. Today hello just hello. Here: hello or just now; Thankyou hello just now.'
 originalLength = len(s)
 print(originalLength)
@@ -76,4 +96,4 @@ compressedLength = len(compressed)
 print(compressedLength)
 
 print("Stopień kompresji: " + str(float(compressedLength)/float(originalLength)))
-uncompressed = uncompress(compressed)
+# uncompressed = uncompress(compressed)
