@@ -1,5 +1,11 @@
 import collections, re, sys
 
+def replaceAllWords(text, wordDict):
+    rc = re.compile(r'\b%s\b' % r'\b|\b'.join(map(re.escape, wordDict)))
+    def translate(match):
+        return wordDict[match.group(0)]
+    return rc.sub(translate, text)
+
 def charUsableForCompression(char, text):
     if(char <= sys.maxunicode and chr(char) in text):
         return False
