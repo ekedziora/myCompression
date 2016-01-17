@@ -1,13 +1,13 @@
-import collections, re
+import collections, re, sys
 
 def charUsableForCompression(char, text):
-    if(char <= 255 and chr(char) in text):
+    if(char <= sys.maxunicode and chr(char) in text):
         return False
     return True
 
 
 def findNextAvailableDelimiter(start, text):
-    for ch in range(start, 256):
+    for ch in range(start, sys.maxunicode + 1):
         if chr(ch) not in text:
             return ch
 
@@ -26,7 +26,7 @@ def compress(text):
     replacementChar = replacementDelimiter + 1
 
     i = 0
-    for ch in range(replacementChar, 256):
+    for ch in range(replacementChar, sys.maxunicode + 1):
         if i >= len(allWordsOrdered):
             break
         if charUsableForCompression(ch, text):
@@ -66,7 +66,7 @@ def uncompress(text):
         text = text.replace(replacement, word)
     return text
 
-s = str(open('enwik8', 'rb').read())
+s = str(open('pantadeuszksiega1.txt', 'rb').read())
 # s = 'Hello. Today hello just hello. Here: hello or just now; Thankyou hello just now.'
 originalLength = len(s)
 print(originalLength)
@@ -77,3 +77,4 @@ print(compressedLength)
 
 print("Stopień kompresji: " + str(float(compressedLength)/float(originalLength)))
 uncompressed = uncompress(compressed)
+print(uncompressed)
