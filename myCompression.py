@@ -24,6 +24,11 @@ def findNextAvailableCode(startCode, text):
         asciiValues = [0] * len(asciiValues)
         asciiValues.append(0)
 
+def findNextCodeNotPrefixOfExistingCode(startCode, text, dictionary):
+    newCode = findNextAvailableCode(startCode, text)
+    while (any([newCode.startswith(code) for code in dictionary.values()])):
+        newCode = findNextAvailableCode(newCode, text)
+    return newCode
 
 def compress(text):
     dictionary = {}
@@ -40,7 +45,7 @@ def compress(text):
     skipFindingNextCode = False
     for word in allWordsOrdered:
         if not skipFindingNextCode:
-            lastReplacement = findNextAvailableCode(lastReplacement, text)
+            lastReplacement = findNextCodeNotPrefixOfExistingCode(lastReplacement, text, dictionary)
         if(len(lastReplacement) < len(word)):
             dictionary[word] = lastReplacement
             skipFindingNextCode = False
@@ -86,7 +91,7 @@ def uncompress(text):
         text = text.replace(replacement, word)
     return text
 
-s = str(open('lifeisfine.txt', 'rb').read())
+s = str(open('switezianka.txt', 'rb').read())
 # s = 'Hello. Today hello just hello. Here: hello or just now; Thankyou hello just now.'
 originalLength = len(s)
 print(originalLength)
