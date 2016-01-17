@@ -70,7 +70,7 @@ def uncompress(text):
         text = text.replace(replacement, word)
     return text
 
-s = str(open('enwik8', 'rb').read())
+s = str(open('pantadeuszksiega1.txt', 'rb').read())
 # s = 'Hello. Today hello just hello. Here: hello or just now; Thankyou hello just now.'
 originalLength = len(s)
 print(originalLength)
