@@ -1,13 +1,19 @@
-import collections, re
+import collections, re, sys, codecs
+
+def replaceAllWords(text, wordDict):
+    rc = re.compile(r'\b%s\b' % r'\b|\b'.join(map(re.escape, wordDict)))
+    def translate(match):
+        return wordDict[match.group(0)]
+    return rc.sub(translate, text)
 
 def charUsableForCompression(char, text):
-    if(char <= 255 and chr(char) in text):
+    if(char <= sys.maxunicode and chr(char) in text):
         return False
     return True
 
 
 def findNextAvailableDelimiter(start, text):
-    for ch in range(start, 256):
+    for ch in range(start, sys.maxunicode + 1):
         if chr(ch) not in text:
             return ch
 
@@ -17,7 +23,9 @@ def compress(text):
     alphanumericWords = re.findall(r'\w+', text)
     punctuationWords = re.findall(r'\W+', text)
     allWords = alphanumericWords + punctuationWords
-    list = sorted(collections.Counter(allWords).items(), key=lambda x: x[1], reverse = True)
+    wordsOccurences = collections.Counter(allWords)
+    wordsOccuredMoreThanOnce = {word: count for word, count in wordsOccurences.items() if count > 1}
+    list = sorted(wordsOccuredMoreThanOnce.items(), key=lambda x: x[1], reverse = True)
     allWordsOrdered = [x[0] for x in list]
 
     dictionaryDelimiter = findNextAvailableDelimiter(32, text)
@@ -26,7 +34,7 @@ def compress(text):
     replacementChar = replacementDelimiter + 1
 
     i = 0
-    for ch in range(replacementChar, 256):
+    for ch in range(replacementChar, sys.maxunicode + 1):
         if i >= len(allWordsOrdered):
             break
         if charUsableForCompression(ch, text):
@@ -36,9 +44,9 @@ def compress(text):
 
     print(dictionary)
     print(len(dictionary))
+    text = replaceAllWords(text, dictionary)
     dictionaryString = ''
     for word, replacement in dictionary.items():
-        text = text.replace(word, replacement)
         dictionaryString += word + replacement + chr(replacementDelimiter)
 
     dictionaryString = chr(dictionaryDelimiter) + dictionaryString
@@ -70,7 +78,7 @@ def uncompress(text):
         text = text.replace(replacement, word)
     return text
 
-s = str(open('pantadeuszksiega1.txt', 'rb').read())
+s = str(codecs.open( "pantadeuszksiega1utf.txt", "r", "utf-8" ).read())
 # s = 'Hello. Today hello just hello. Here: hello or just now; Thankyou hello just now.'
 originalLength = len(s)
 print(originalLength)
@@ -81,3 +89,4 @@ print(compressedLength)
 
 print("Stopień kompresji: " + str(float(compressedLength)/float(originalLength)))
 uncompressed = uncompress(compressed)
+# print(uncompressed)
