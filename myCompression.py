@@ -1,4 +1,4 @@
-import collections, re, sys, codecs
+import collections, re, sys, codecs, os.path
 
 def replaceAllWords(text, wordDict):
     rc = re.compile(r'\b%s\b' % r'\b|\b'.join(map(re.escape, wordDict)))
@@ -32,7 +32,7 @@ def replacePrefixes(dictionary):
                 dictionary[replacement2] = word2.replace(replacement, word)
     return dictionary
 
-def compress(text):
+def compress(text, prefixing):
     dictionary = {}
     alphanumericWords = re.findall(r'\w+', text)
     punctuationWords = re.findall(r'\W+', text)
@@ -56,17 +56,15 @@ def compress(text):
             dictionary[word] = chr(ch)
             i += 1
 
-    print(dictionary)
-    print(len(dictionary))
     text = replaceAllWords(text, dictionary)
-    dictionary = preformDictionaryPrefixesExtraction(dictionary)
+    if prefixing:
+        dictionary = preformDictionaryPrefixesExtraction(dictionary)
+
     dictionaryString = ''
     for word, replacement in dictionary.items():
         dictionaryString += word + replacement + chr(replacementDelimiter)
 
     dictionaryString = chr(dictionaryDelimiter) + dictionaryString
-    print('dictionary string len:' + str(len(dictionaryString)))
-    print('text len:' + str(len(text)))
     return chr(dictionaryDelimiter) + chr(replacementDelimiter) + text + dictionaryString
 
 
@@ -81,7 +79,7 @@ def extractDictionary(dictionaryString, replacementDelimiter):
             lastDelimiterPos = i+1
     return dictionary
 
-def uncompress(text):
+def uncompress(text, prefixing):
     dictionaryDelimiter = text[0]
     replacementDelimiter = text[1]
     text = text[2:]
@@ -89,20 +87,39 @@ def uncompress(text):
     dictionaryString = text[dictionaryStart:]
     text = text[:dictionaryStart - 1]
     dictionary = extractDictionary(dictionaryString, replacementDelimiter)
-    dictionary = replacePrefixes(dictionary)
+    if prefixing:
+        dictionary = replacePrefixes(dictionary)
     for replacement, word in dictionary.items():
         text = text.replace(replacement, word)
     return text
 
-s = str(codecs.open( "pantadeuszksiega1utf.txt", "r", "utf-8" ).read())
-# s = 'Hello. Today hello just hello. Here: hello or just now; Thankyou hello just now.'
-originalLength = len(s)
-print(originalLength)
+if(len(sys.argv) < 2):
+    print("Nie podano pliku do skompresowania")
+    exit(1)
 
-compressed = compress(s)
-compressedLength = len(compressed)
-print(compressedLength)
+filepath = sys.argv[1]
+if(not os.path.isfile(filepath)):
+    print("Podana ścieżka do pliku jest nieprawidłowa")
+    exit(1)
 
+try:
+    text = str(codecs.open(filepath, "r", "utf-8").read())
+except UnicodeDecodeError:
+    print("Podany plik nie jest plikiem UTF-8")
+    exit(1)
+
+if(len(sys.argv) > 2 and sys.argv[2] == "-prefix"):
+    prefixing = True
+else:
+    prefixing = False
+
+compressed = compress(text, prefixing)
+originalLength = len(text.encode())
+compressedLength = len(compressed.encode())
 print("Stopień kompresji: " + str(float(compressedLength)/float(originalLength)))
-uncompressed = uncompress(compressed)
-# print(uncompressed)
+
+uncompressed = uncompress(compressed, prefixing)
+
+out = codecs.open("uncompressed.txt", "w", "utf-8")
+out.write(uncompressed)
+out.close()
