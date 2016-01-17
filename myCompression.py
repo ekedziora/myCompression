@@ -17,6 +17,20 @@ def findNextAvailableDelimiter(start, text):
         if chr(ch) not in text:
             return ch
 
+def preformDictionaryPrefixesExtraction(dictionary):
+    for word, replacement in dictionary.items():
+        for word2, replacement2 in dictionary.items():
+            if word2 != word and word2.startswith(word):
+                prefixedKey = word2.replace(word, replacement)
+                dictionary[prefixedKey] = dictionary.pop(word2)
+    return dictionary
+
+def replacePrefixes(dictionary):
+    for replacement, word in dictionary.items():
+        for replacement2, word2 in dictionary.items():
+            if replacement != replacement2 and replacement in word2:
+                dictionary[replacement2] = word2.replace(replacement, word)
+    return dictionary
 
 def compress(text):
     dictionary = {}
@@ -24,7 +38,7 @@ def compress(text):
     punctuationWords = re.findall(r'\W+', text)
     allWords = alphanumericWords + punctuationWords
     wordsOccurences = collections.Counter(allWords)
-    wordsOccuredMoreThanOnce = {word: count for word, count in wordsOccurences.items() if count > 1}
+    wordsOccuredMoreThanOnce = {word: count for word, count in wordsOccurences.items() if count > 1 and len(word) > 1}
     list = sorted(wordsOccuredMoreThanOnce.items(), key=lambda x: x[1], reverse = True)
     allWordsOrdered = [x[0] for x in list]
 
@@ -45,6 +59,7 @@ def compress(text):
     print(dictionary)
     print(len(dictionary))
     text = replaceAllWords(text, dictionary)
+    dictionary = preformDictionaryPrefixesExtraction(dictionary)
     dictionaryString = ''
     for word, replacement in dictionary.items():
         dictionaryString += word + replacement + chr(replacementDelimiter)
@@ -74,6 +89,7 @@ def uncompress(text):
     dictionaryString = text[dictionaryStart:]
     text = text[:dictionaryStart - 1]
     dictionary = extractDictionary(dictionaryString, replacementDelimiter)
+    dictionary = replacePrefixes(dictionary)
     for replacement, word in dictionary.items():
         text = text.replace(replacement, word)
     return text
