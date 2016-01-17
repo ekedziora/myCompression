@@ -17,7 +17,9 @@ def compress(text):
     alphanumericWords = re.findall(r'\w+', text)
     punctuationWords = re.findall(r'\W+', text)
     allWords = alphanumericWords + punctuationWords
-    list = sorted(collections.Counter(allWords).items(), key=lambda x: x[1], reverse = True)
+    wordsOccurences = collections.Counter(allWords)
+    wordsOccuredMoreThanOnce = {word: count for word, count in wordsOccurences.items() if count > 7}
+    list = sorted(wordsOccuredMoreThanOnce.items(), key=lambda x: x[1], reverse = True)
     allWordsOrdered = [x[0] for x in list]
 
     dictionaryDelimiter = findNextAvailableDelimiter(32, text)
