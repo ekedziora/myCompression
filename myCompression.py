@@ -1,4 +1,4 @@
-import collections, re, sys
+import collections, re, sys, codecs
 
 def replaceAllWords(text, wordDict):
     rc = re.compile(r'\b%s\b' % r'\b|\b'.join(map(re.escape, wordDict)))
@@ -24,7 +24,7 @@ def compress(text):
     punctuationWords = re.findall(r'\W+', text)
     allWords = alphanumericWords + punctuationWords
     wordsOccurences = collections.Counter(allWords)
-    wordsOccuredMoreThanOnce = {word: count for word, count in wordsOccurences.items() if count > 7}
+    wordsOccuredMoreThanOnce = {word: count for word, count in wordsOccurences.items() if count > 1}
     list = sorted(wordsOccuredMoreThanOnce.items(), key=lambda x: x[1], reverse = True)
     allWordsOrdered = [x[0] for x in list]
 
@@ -78,7 +78,7 @@ def uncompress(text):
         text = text.replace(replacement, word)
     return text
 
-s = str(open('pantadeuszksiega1.txt', 'rb').read())
+s = str(codecs.open( "pantadeuszksiega1utf.txt", "r", "utf-8" ).read())
 # s = 'Hello. Today hello just hello. Here: hello or just now; Thankyou hello just now.'
 originalLength = len(s)
 print(originalLength)
@@ -89,4 +89,4 @@ print(compressedLength)
 
 print("Stopień kompresji: " + str(float(compressedLength)/float(originalLength)))
 uncompressed = uncompress(compressed)
-print(uncompressed)
+# print(uncompressed)
