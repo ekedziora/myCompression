@@ -44,9 +44,9 @@ def compress(text):
 
     print(dictionary)
     print(len(dictionary))
+    text = replaceAllWords(text, dictionary)
     dictionaryString = ''
     for word, replacement in dictionary.items():
-        text = text.replace(word, replacement)
         dictionaryString += word + replacement + chr(replacementDelimiter)
 
     dictionaryString = chr(dictionaryDelimiter) + dictionaryString
