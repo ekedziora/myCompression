@@ -34,12 +34,16 @@ def compress(text):
             dictionary[word] = chr(ch)
             i += 1
 
+    print(dictionary)
+    print(len(dictionary))
     dictionaryString = ''
     for word, replacement in dictionary.items():
         text = text.replace(word, replacement)
         dictionaryString += word + replacement + chr(replacementDelimiter)
 
     dictionaryString = chr(dictionaryDelimiter) + dictionaryString
+    print('dictionary string len:' + str(len(dictionaryString)))
+    print('text len:' + str(len(text)))
     return chr(dictionaryDelimiter) + chr(replacementDelimiter) + text + dictionaryString
 
 
