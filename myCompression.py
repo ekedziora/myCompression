@@ -1,4 +1,4 @@
-import collections, re, sys, codecs, os.path
+import collections, re, sys, codecs, os.path, time
 
 def replaceAllWords(text, wordDict):
     rc = re.compile(r'\b%s\b' % r'\b|\b'.join(map(re.escape, wordDict)))
@@ -37,6 +37,7 @@ def compress(text, prefixing):
     alphanumericWords = re.findall(r'\w+', text)
     punctuationWords = re.findall(r'\W+', text)
     allWords = alphanumericWords + punctuationWords
+    print("Wszystkich słów: " + str(len(allWords)))
     wordsOccurences = collections.Counter(allWords)
     wordsOccuredMoreThanOnce = {word: count for word, count in wordsOccurences.items() if count > 1 and len(word) > 1}
     list = sorted(wordsOccuredMoreThanOnce.items(), key=lambda x: x[1], reverse = True)
@@ -113,12 +114,26 @@ if(len(sys.argv) > 2 and sys.argv[2] == "-prefix"):
 else:
     prefixing = False
 
+startCompression = time.time()
 compressed = compress(text, prefixing)
-originalLength = len(text.encode())
-compressedLength = len(compressed.encode())
-print("Stopień kompresji: " + str(float(compressedLength)/float(originalLength)))
+stopCompression = time.time()
+originalLength = len(text)
+compressedLength = len(compressed)
+originalBytesLength = len(text.encode())
+compressedBytesLength = len(compressed.encode())
+print("Długość oryginalnego tekstu: " + str(originalLength))
+print("Długość skompresowanego tekstu: " + str(compressedLength))
+print("Długość orginalnego tekstu w bajtach: " + str(originalBytesLength))
+print("Długość skompresowanego tekstu w bajtach: " + str(compressedBytesLength))
+print("Stopień kompresji: " + str(float(compressedBytesLength) / float(originalBytesLength)))
 
+startUncompression = time.time()
 uncompressed = uncompress(compressed, prefixing)
+stopUncompression = time.time()
+
+print("Czas wykonania: " + str(stopUncompression - startCompression))
+print("Czas kompresji: "+ str(stopCompression - startCompression))
+print("Czas dekompresji: "+ str(stopUncompression - startUncompression))
 
 out = codecs.open("uncompressed.txt", "w", "utf-8")
 out.write(uncompressed)
