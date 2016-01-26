@@ -127,7 +127,7 @@ print("Długość orginalnego tekstu w bajtach: " + str(originalBytesLength))
 print("Długość skompresowanego tekstu w bajtach: " + str(compressedBytesLength))
 print("Stopień kompresji: " + str(float(compressedBytesLength) / float(originalBytesLength)))
 
-out = codecs.open("compressed.txt", "w", "utf-8")
+out = codecs.open(filepath + ".compressed", "w", "utf-8")
 out.write(compressed)
 out.close()
 
@@ -139,6 +139,6 @@ print("Czas wykonania: " + str(stopUncompression - startCompression))
 print("Czas kompresji: "+ str(stopCompression - startCompression))
 print("Czas dekompresji: "+ str(stopUncompression - startUncompression))
 
-out = codecs.open("uncompressed.txt", "w", "utf-8")
+out = codecs.open(filepath + ".uncompressed", "w", "utf-8")
 out.write(uncompressed)
 out.close()
